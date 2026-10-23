@@ -167,9 +167,12 @@ footer .names { font-size: 15px; color: var(--ink); font-weight: 500; margin: 0 
 /* Motion: slow zoom on the cover, names drift in, sections rise on scroll, petals fall */
 .cover .ph { overflow: hidden; }
 #petals { position: fixed; inset: 0; width: 100%; height: 100%; pointer-events: none; z-index: 5; }
+/* Cover zoom runs for everyone; phones with reduced motion get a slower, smaller version */
+.cover .ph img { animation: drift 14s ease-in-out infinite alternate; transform-origin: 55% 60%; }
+@keyframes drift { from { transform: scale(1); } to { transform: scale(1.09) translateY(-1.5%); } }
+@keyframes driftSoft { from { transform: scale(1); } to { transform: scale(1.04); } }
+@media (prefers-reduced-motion: reduce) { .cover .ph img { animation: driftSoft 24s ease-in-out infinite alternate; } }
 @media (prefers-reduced-motion: no-preference) {
-  .cover .ph img { animation: drift 14s ease-in-out infinite alternate; transform-origin: 55% 60%; }
-  @keyframes drift { from { transform: scale(1); } to { transform: scale(1.09) translateY(-1.5%); } }
   .cover-text > * { animation: appear 1.4s ease both; }
   .cover-text > *:nth-child(2) { animation-delay: .35s; }
   @keyframes appear { from { opacity: 0; transform: translateY(10px); letter-spacing: .14em; } to { opacity: 1; transform: none; } }
@@ -456,16 +459,17 @@ if (motionOK && "IntersectionObserver" in window) {
 
 /* Falling petals */
 (function petals() {
-  const cv = $("#petals"); if (!motionOK || !cv.getContext) { cv.hidden = true; return; }
+  const cv = $("#petals"); if (!cv.getContext) { cv.hidden = true; return; }
+  const soft = !motionOK; // reduced-motion phones: fewer, slower petals
   const ctx = cv.getContext("2d");
   const COLORS = ["#F4DDD6", "#EFD3C8", "#FBEFEA", "#F7E6DC", "#FFFFFF"];
   let W, H, dpr, list = [], running = true, last = 0;
   function size() { dpr = Math.min(devicePixelRatio || 1, 2); W = innerWidth; H = innerHeight; cv.width = W * dpr; cv.height = H * dpr; ctx.setTransform(dpr, 0, 0, dpr, 0, 0); }
-  const N = () => Math.round(Math.min(26, Math.max(14, W / 22)));
+  const N = () => Math.round(Math.min(26, Math.max(14, W / 22)) * (soft ? .5 : 1));
   function make(top) {
     return { x: Math.random() * W, y: top ? -20 - Math.random() * H * 0.3 : Math.random() * H,
-      r: 5 + Math.random() * 6, vy: 18 + Math.random() * 22, sway: 14 + Math.random() * 26, ph: Math.random() * 6.28,
-      rot: Math.random() * 6.28, vr: (Math.random() - .5) * 1.4, flip: Math.random() * 6.28,
+      r: 5 + Math.random() * 6, vy: (18 + Math.random() * 22) * (soft ? .6 : 1), sway: 14 + Math.random() * 26, ph: Math.random() * 6.28,
+      rot: Math.random() * 6.28, vr: (Math.random() - .5) * (soft ? .6 : 1.4), flip: Math.random() * 6.28,
       c: COLORS[(Math.random() * COLORS.length) | 0], a: .55 + Math.random() * .35 };
   }
   function petal(p) {
