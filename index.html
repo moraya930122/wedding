@@ -464,7 +464,17 @@ if (motionOK && "IntersectionObserver" in window) {
   const ctx = cv.getContext("2d");
   const COLORS = ["#F4DDD6", "#EFD3C8", "#FBEFEA", "#F7E6DC", "#FFFFFF"];
   let W, H, dpr, list = [], running = true, last = 0;
-  function size() { dpr = Math.min(devicePixelRatio || 1, 2); W = innerWidth; H = innerHeight; cv.width = W * dpr; cv.height = H * dpr; ctx.setTransform(dpr, 0, 0, dpr, 0, 0); }
+  // In-app browsers (KakaoTalk on iPhone) can report a 0×0 viewport while the page is still opening,
+  // so read several sources and re-measure until a real size arrives.
+  function size() {
+    const de = document.documentElement;
+    const w = innerWidth || de.clientWidth || (screen && screen.width) || 390;
+    const h = innerHeight || de.clientHeight || (screen && screen.height) || 844;
+    const grew = !W || w > W * 1.5;
+    dpr = Math.min(devicePixelRatio || 1, 2); W = w; H = h;
+    cv.width = W * dpr; cv.height = H * dpr; ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    if (grew) list.forEach(p => { p.x = Math.random() * W; p.y = Math.random() * H; });
+  }
   const N = () => Math.round(Math.min(26, Math.max(14, W / 22)) * (soft ? .5 : 1));
   function make(top) {
     return { x: Math.random() * W, y: top ? -20 - Math.random() * H * 0.3 : Math.random() * H,
@@ -482,8 +492,10 @@ if (motionOK && "IntersectionObserver" in window) {
     ctx.bezierCurveTo(-p.r * .7, p.r * .7, -p.r * .9, -p.r * .6, 0, -p.r);
     ctx.fill(); ctx.restore();
   }
+  let frames = 0;
   function frame(t) {
     if (!running) return;
+    frames++;
     const dt = Math.min(.05, (t - last) / 1000 || 0); last = t;
     ctx.clearRect(0, 0, W, H);
     for (const p of list) {
@@ -493,11 +505,32 @@ if (motionOK && "IntersectionObserver" in window) {
     }
     requestAnimationFrame(frame);
   }
+  const refit = () => { size(); while (list.length < N()) list.push(make(true)); list.length = N(); };
   size(); list = Array.from({ length: N() }, () => make(false));
-  addEventListener("resize", () => { size(); while (list.length < N()) list.push(make(true)); list.length = N(); });
+  addEventListener("resize", refit);
+  addEventListener("orientationchange", () => setTimeout(refit, 300));
+  addEventListener("load", refit);
+  [300, 1000, 2500].forEach(t => setTimeout(refit, t));
+  if (window.visualViewport) visualViewport.addEventListener("resize", refit);
   document.addEventListener("visibilitychange", () => { running = !document.hidden; if (running) { last = performance.now(); requestAnimationFrame(frame); } });
   requestAnimationFrame(frame);
+  window.__petals = { list, get W() { return W; }, get H() { return H; }, get frames() { return frames; } };
 })();
+
+/* ?debug=1 shows what the browser reports, for checking in-app browsers */
+if (/[?&]debug=1/.test(location.search)) {
+  const box = document.createElement("pre");
+  box.style.cssText = "position:fixed;left:8px;right:8px;bottom:8px;z-index:40;background:rgba(0,0,0,.78);color:#fff;font:11px/1.45 monospace;padding:8px;border-radius:6px;white-space:pre-wrap;margin:0";
+  document.body.appendChild(box);
+  const errs = [];
+  addEventListener("error", e => errs.push(e.message));
+  const tick = () => {
+    const img = document.querySelector(".cover img"), cs = img ? getComputedStyle(img) : {};
+    const P = window.__petals || {};
+    box.textContent = `ver 2026-10-23c\nUA ${navigator.userAgent}\nreduce ${matchMedia("(prefers-reduced-motion: reduce)").matches}\ninner ${innerWidth}x${innerHeight} canvas ${P.W}x${P.H} petals ${P.list && P.list.length} frames ${P.frames}\ncover anim ${cs.animationName} ${cs.animationPlayState} tf ${cs.transform}\nerrors ${errs.join(" | ") || "none"}`;
+  };
+  setInterval(tick, 500); tick();
+}
 
 /* Copy + toast */
 let tt;
