@@ -2,7 +2,7 @@
 <html lang="ko">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
 <meta name="description" content="2026년 12월 26일 토요일 낮 12시 30분, 드레스가든 4층">
 <meta property="og:type" content="website">
 <meta property="og:title" content="박봉경 ♥ 이아라 결혼합니다">
@@ -32,6 +32,7 @@
   color-scheme: light;
 }
 * { box-sizing: border-box; }
+html, body { touch-action: pan-x pan-y; }
 body { background: var(--sand); color: var(--text); font-family: var(--sans); font-weight: 400; font-size: 15px; line-height: 1.75; -webkit-font-smoothing: antialiased; word-break: keep-all; }
 .card { max-width: 460px; margin: 0 auto; background: var(--linen); overflow: hidden; }
 .pad { padding-left: max(28px, env(safe-area-inset-left, 0px)); padding-right: max(28px, env(safe-area-inset-right, 0px)); }
@@ -61,7 +62,8 @@ button { font: inherit; cursor: pointer; }
 .facts { padding-block: 32px 8px; display: grid; gap: 6px; }
 .fact { display: flex; justify-content: space-between; gap: 16px; }
 .fact dt { color: var(--mute); }
-.fact dd { margin: 0; color: var(--ink); font-weight: 500; text-align: right; min-width: 0; }
+.fact dt { flex: none; }
+.fact dd { margin: 0; color: var(--ink); font-weight: 500; text-align: right; min-width: 0; white-space: nowrap; font-size: clamp(13px, 3.9vw, 15px); font-variant-numeric: tabular-nums; }
 
 /* Greeting */
 .greeting { text-align: center; }
@@ -70,11 +72,23 @@ button { font: inherit; cursor: pointer; }
 .parents b { display: block; font-size: 16px; font-weight: 600; color: var(--ink); margin-bottom: 4px; }
 .parents span { font-size: 13.5px; }
 
-/* Gallery */
-.gallery { display: grid; grid-template-columns: repeat(3, 1fr); gap: 3px; }
-.gallery button { border: 0; padding: 0; background: none; display: block; }
-.gallery .ph { aspect-ratio: 3 / 4; }
-.more { display: block; margin: 20px auto 0; background: none; border: 1px solid var(--oat); color: var(--text); border-radius: 6px; padding: 8px 22px; font-size: 13.5px; }
+/* Gallery: one photo at a time, swipe or arrows */
+.slider { position: relative; }
+.track { display: flex; overflow-x: auto; scroll-snap-type: x mandatory; scroll-behavior: smooth; scrollbar-width: none; -webkit-overflow-scrolling: touch; overscroll-behavior-x: contain; }
+.track::-webkit-scrollbar { display: none; }
+.slide { flex: 0 0 100%; scroll-snap-align: center; scroll-snap-stop: always; }
+.slide .ph { aspect-ratio: 2 / 3; width: 100%; }
+.nav { position: absolute; z-index: 2; top: 50%; transform: translateY(-50%); width: 40px; height: 40px; border-radius: 50%; border: 0; background: rgba(250,247,242,.72); color: var(--ink); font-size: 22px; line-height: 1; display: grid; place-items: center; box-shadow: 0 1px 4px rgba(62,56,51,.15); }
+.nav.prev { left: 12px; } .nav.next { right: 12px; }
+.nav:disabled { opacity: 0; pointer-events: none; }
+.dots { display: flex; justify-content: center; gap: 8px; padding-block: 16px 0; }
+.dots button { width: 7px; height: 7px; padding: 0; border: 0; border-radius: 50%; background: var(--oat); transition: background .3s, transform .3s; }
+.dots button[aria-current="true"] { background: var(--taupe); transform: scale(1.25); }
+.gallery-wrap { padding-block: 0 8px; }
+/* Photos can't be dragged, long-pressed to save, or selected */
+.ph, .ph img { -webkit-user-select: none; user-select: none; -webkit-touch-callout: none; -webkit-user-drag: none; }
+.ph img { pointer-events: none; }
+.ph::before { content: ""; position: absolute; inset: 0; z-index: 1; }
 
 /* Calendar */
 .cal { text-align: center; }
@@ -119,12 +133,6 @@ button { font: inherit; cursor: pointer; }
 .acc .num { color: var(--ink); font-variant-numeric: tabular-nums; overflow-wrap: anywhere; }
 
 /* RSVP popup + section */
-.modal { position: fixed; inset: 0; background: rgba(46,41,37,.55); z-index: 15; display: grid; place-items: center; padding: 24px max(20px, env(safe-area-inset-right, 0px)) 24px max(20px, env(safe-area-inset-left, 0px)); }
-.sheet { background: var(--linen); width: min(360px, 100%); border-radius: 14px; padding: 32px 24px 20px; text-align: center; box-shadow: 0 12px 40px rgba(46,41,37,.25); }
-.sheet h3 { margin: 0 0 6px; font-size: 18px; font-weight: 600; color: var(--ink); }
-.sheet p { margin: 0 0 20px; font-size: 14px; }
-.sheet .info { background: var(--paper); border: 1px solid var(--oat); border-radius: 10px; padding: 12px; font-size: 13.5px; margin-bottom: 20px; line-height: 1.65; }
-.sheet .info b { color: var(--ink); font-weight: 600; }
 .btn.primary { background: var(--taupe); border-color: var(--taupe); color: var(--paper); width: 100%; justify-content: center; padding: 12px; }
 .btn.primary:disabled { opacity: .5; cursor: default; }
 .rsvp-form { display: grid; gap: 10px; text-align: left; }
@@ -142,12 +150,10 @@ button { font: inherit; cursor: pointer; }
 .form-msg.err { color: #A2574A; }
 .thanks { padding: 12px 0 4px; }
 .thanks b { display: block; font-size: 17px; color: var(--ink); font-weight: 600; margin-bottom: 6px; }
-.sheet { max-height: calc(100vh - 48px); overflow-y: auto; }
-.sheet-foot { display: flex; justify-content: space-between; margin-top: 14px; }
-.link { background: none; border: 0; color: var(--mute); font-size: 13px; padding: 6px 2px; }
 .rsvp { text-align: center; }
 .rsvp p { margin: 0 0 20px; }
-.rsvp .btn.primary { width: auto; padding: 12px 28px; }
+.rsvp .rsvp-form { max-width: 340px; margin: 0 auto; }
+.rsvp .seg legend { text-align: left; }
 .note { font-size: 12px; color: var(--mute); margin-top: 10px !important; }
 
 /* Footer */
@@ -155,13 +161,6 @@ footer { text-align: center; padding-block: 48px 64px; font-size: 13px; color: v
 footer .names { font-size: 15px; color: var(--ink); font-weight: 500; margin: 0 0 6px; }
 
 /* Lightbox + toast */
-.lb { position: fixed; inset: 0; background: rgba(30,27,24,.92); z-index: 20; display: grid; place-items: center; padding: max(24px, env(safe-area-inset-top, 0px)) 16px max(24px, env(safe-area-inset-bottom, 0px)); }
-.lb .ph { width: min(420px, 100%); aspect-ratio: 2 / 3; max-height: 82vh; background: none; }
-.lb .ph img { object-fit: contain; }
-.lb-close { position: absolute; top: calc(12px + env(safe-area-inset-top, 0px)); right: calc(12px + env(safe-area-inset-right, 0px)); background: none; border: 0; color: #F1EBE2; font-size: 28px; line-height: 1; padding: 8px; }
-.lb-nav { position: absolute; top: 50%; transform: translateY(-50%); background: none; border: 0; color: #F1EBE2; font-size: 30px; padding: 12px; }
-.lb-prev { left: calc(4px + env(safe-area-inset-left, 0px)); } .lb-next { right: calc(4px + env(safe-area-inset-right, 0px)); }
-.lb-count { position: absolute; bottom: calc(16px + env(safe-area-inset-bottom, 0px)); left: 0; right: 0; text-align: center; color: #CFC5B8; font-size: 13px; }
 .toast { position: fixed; left: 50%; bottom: calc(28px + env(safe-area-inset-bottom, 0px)); transform: translateX(-50%); background: var(--ink); color: var(--linen); font-size: 13.5px; padding: 9px 18px; border-radius: 99px; z-index: 30; white-space: nowrap; }
 
 /* Motion: slow zoom on the cover, names drift in, sections rise on scroll, petals fall */
@@ -181,47 +180,31 @@ footer .names { font-size: 15px; color: var(--ink); font-weight: 500; margin: 0 
 }
 </style>
 
+<script>
+/* ?debug=1: an on-screen panel for checking in-app browsers. Loaded first so it can catch errors in the main script. */
+(function () {
+  if (!/[?&]debug=1/.test(location.search)) return;
+  var errs = [], steps = [];
+  window.__dbgStep = function (s) { steps.push(s); };
+  window.__dbgErr = function (m) { errs.push(m); };
+  window.addEventListener("error", function (e) { errs.push((e.message || "error") + " @" + (e.lineno || "?") + ":" + (e.colno || "?")); });
+  window.addEventListener("unhandledrejection", function (e) { errs.push("promise: " + (e.reason && e.reason.message || e.reason)); });
+  function show() {
+    var box = document.getElementById("dbg");
+    if (!box) { box = document.createElement("pre"); box.id = "dbg"; box.style.cssText = "position:fixed;left:8px;right:8px;bottom:8px;z-index:99;background:rgba(0,0,0,.8);color:#fff;font:11px/1.45 monospace;padding:8px;border-radius:6px;white-space:pre-wrap;margin:0;max-height:45vh;overflow:auto"; (document.body || document.documentElement).appendChild(box); }
+    var img = document.querySelector(".cover img"), cs = img ? getComputedStyle(img) : {}, P = window.__petals || {};
+    var rm = window.matchMedia ? matchMedia("(prefers-reduced-motion: reduce)").matches : "n/a";
+    box.textContent = "ver 2026-10-26a\nUA " + navigator.userAgent + "\nreduce " + rm +
+      "\ninner " + innerWidth + "x" + innerHeight + " canvas " + P.W + "x" + P.H + " petals " + (P.list && P.list.length) + " frames " + P.frames +
+      "\ncover anim " + cs.animationName + " " + cs.animationPlayState +
+      "\nsteps " + (steps.join(" > ") || "-") + "\nerrors " + (errs.join(" | ") || "none");
+  }
+  document.addEventListener("DOMContentLoaded", function () { show(); setInterval(show, 500); });
+})();
+</script>
 </head>
 <body>
 <main class="card" id="app"></main>
-<div class="lb" id="lb" hidden role="dialog" aria-label="사진 크게 보기">
-  <button class="lb-close" id="lbClose" aria-label="닫기">×</button>
-  <button class="lb-nav lb-prev" id="lbPrev" aria-label="이전 사진">‹</button>
-  <div class="ph" id="lbPh"></div>
-  <button class="lb-nav lb-next" id="lbNext" aria-label="다음 사진">›</button>
-  <div class="lb-count" id="lbCount"></div>
-</div>
-<div class="modal" id="rsvpModal" hidden role="dialog" aria-modal="true" aria-labelledby="rsvpTitle">
-  <div class="sheet">
-    <p class="eyebrow">R.S.V.P.</p>
-    <h3 id="rsvpTitle">참석 여부를 알려주세요</h3>
-    <p>원활한 식사 준비를 위해<br>참석 여부를 미리 여쭙고자 합니다.</p>
-    <div id="rsvpBody">
-      <form class="rsvp-form" id="rsvpForm" novalidate>
-        <fieldset class="seg"><legend>어느 분의 하객이신가요?</legend>
-          <label><input type="radio" name="side" value="신랑측" id="sideG"><span>신랑측</span></label>
-          <label><input type="radio" name="side" value="신부측" id="sideB"><span>신부측</span></label>
-        </fieldset>
-        <fieldset class="seg"><legend>참석 여부</legend>
-          <label><input type="radio" name="attend" value="참석" id="attY"><span>참석</span></label>
-          <label><input type="radio" name="attend" value="불참" id="attN"><span>불참</span></label>
-        </fieldset>
-        <input class="field" id="rsvpName" name="name" placeholder="성함" maxlength="20" autocomplete="name">
-        <div class="row-2" id="rsvpExtra">
-          <select class="field" id="rsvpCount" name="count" aria-label="인원">
-            <option value="1">본인 1명</option><option value="2">2명</option><option value="3">3명</option><option value="4">4명</option><option value="5">5명 이상</option>
-          </select>
-          <select class="field" id="rsvpMeal" name="meal" aria-label="식사">
-            <option value="식사 예정">식사 예정</option><option value="식사 안 함">식사 안 함</option><option value="미정">미정</option>
-          </select>
-        </div>
-        <button class="btn primary" type="submit" id="rsvpSubmit">참석 여부 전달하기</button>
-        <p class="form-msg" id="rsvpOut" role="status"></p>
-      </form>
-    </div>
-    <div class="sheet-foot"><button class="link" id="rsvpToday">오늘 하루 보지 않기</button><button class="link" id="rsvpClose">닫기</button></div>
-  </div>
-</div>
 <canvas id="petals" aria-hidden="true"></canvas>
 <div class="toast" id="toast" hidden></div>
 
@@ -244,14 +227,16 @@ const DATA = {
   ],
   rsvpEndpoint: "https://script.google.com/macros/s/AKfycbyqGmy0GMyYFO_TvQBXM6SewB9mu5QcIwK_IWl9jZdPFCz1sJT-JdAjnvwMMWRTFG2uRg/exec", // 구글 앱스 스크립트 웹 앱 URL (https://script.google.com/macros/s/.../exec)
   accounts: {
-    groom: [ ["신랑", "박봉경", "", ""], ["아버지", "박종훈", "", ""], ["어머니", "황경순", "", ""] ],
+    groom: [ ["신랑", "박봉경", "신한은행", "110-212-181500"], ["아버지", "박종훈", "신한은행", "110-006-916133"], ["어머니", "황경순", "신한은행", "110-231-530855"] ],
     bride: [ ["신부", "이아라", "", ""], ["아버지", "이재욱", "", ""], ["어머니", "김마리아", "", ""] ]
   },
-  photos: { cover: "img/main.jpg", gallery: ["img/g01.jpg", "img/g02.jpg", "img/g03.jpg", "img/g04.jpg", "img/g05.jpg", "img/g06.jpg", "img/g07.jpg", "img/g08.jpg", "img/main.jpg"] }
+  photos: { cover: "img/main.jpg", gallery: ["img/g04.jpg", "img/g02.jpg", "img/g06.jpg", "img/g01.jpg"] }
 };
 /* =================================================================== */
 
 const $ = (s, el = document) => el.querySelector(s);
+const motionOK = !(window.matchMedia && matchMedia("(prefers-reduced-motion: reduce)").matches);
+const guard = (name, fn) => { try { fn(); } catch (e) { (window.__dbgErr || console.error)(name + ": " + (e && e.message)); } };
 const esc = s => String(s).replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
 const ph = (src, label, cls = "") => `<div class="ph ${src ? "has-img" : ""} ${cls}" data-label="${esc(label)}">${src ? `<img src="${esc(src)}" alt="" ${cls.includes("eager") ? "" : 'loading="lazy"'}>` : ""}</div>`;
 const ICON = {
@@ -266,9 +251,10 @@ const KST = new Date(d.getTime() + 9 * 3600e3); // 표시는 항상 한국 시�
 const Y = KST.getUTCFullYear(), M = KST.getUTCMonth(), D = KST.getUTCDate(), W = KST.getUTCDay();
 const H = KST.getUTCHours(), MI = KST.getUTCMinutes();
 const DOW = ["일", "월", "화", "수", "목", "금", "토"];
-const ampm = H < 12 ? "오전" : "오후", h12 = ((H + 11) % 12) + 1;
+const ampm = H < 12 ? "오전" : H < 14 ? "낮" : "오후", h12 = ((H + 11) % 12) + 1;
 const timeKo = `${ampm} ${h12}시${MI ? ` ${MI}분` : ""}`;
 const dateKo = `${Y}년 ${M + 1}월 ${D}일 ${DOW[W]}요일 ${timeKo}`;
+const dateShort = `${Y}. ${M + 1}. ${D}. (${DOW[W]}) ${timeKo}`;
 const G = DATA.groom, B = DATA.bride, V = DATA.venue;
 
 function calendarHTML() {
@@ -298,7 +284,6 @@ function gcalLink() {
   const p = new URLSearchParams({ action: "TEMPLATE", text: `${G.name} ♥ ${B.name} 결혼식`, dates: `${fmt(d)}/${fmt(d.getTime() + 2 * 3600e3)}`, location: `${V.name} ${V.hall}, ${V.address}` });
   return "https://calendar.google.com/calendar/render?" + p.toString();
 }
-function rsvpButton() { return `<button class="btn primary" id="rsvpOpen" type="button">참석 여부 전달하기</button>`; }
 const accHTML = list => list.map(([role, name, bank, num]) => `
   <div class="acc"><div><div class="who">${esc(role)} ${esc(name)}</div><div class="num">${num ? esc(bank + " " + num) : '<span style="color:var(--mute)">계좌번호 준비 중</span>'}</div></div>
   ${num ? `<button class="btn sm" data-copy="${esc(bank + " " + num)}" data-msg="계좌번호를 복사했어요">${ICON.copy}복사</button>` : ""}</div>`).join("");
@@ -311,7 +296,7 @@ $("#app").innerHTML = `
 </header>
 
 <dl class="facts pad">
-  <div class="fact"><dt>일시</dt><dd>${dateKo}</dd></div>
+  <div class="fact"><dt>일시</dt><dd>${dateShort}</dd></div>
   <div class="fact"><dt>장소</dt><dd>${esc(V.name)} ${esc(V.hall)}</dd></div>
 </dl>
 
@@ -325,8 +310,14 @@ $("#app").innerHTML = `
   </div>
 </section>
 
-<div class="gallery" id="gallery"></div>
-<button class="more" id="more" hidden>사진 더 보기</button>
+<div class="gallery-wrap">
+  <div class="slider" aria-roledescription="carousel" aria-label="사진">
+    <div class="track" id="track"></div>
+    <button class="nav prev" id="prevBtn" type="button" aria-label="이전 사진">‹</button>
+    <button class="nav next" id="nextBtn" type="button" aria-label="다음 사진">›</button>
+  </div>
+  <div class="dots" id="dots"></div>
+</div>
 
 <section class="cal pad">
   <p class="eyebrow">Wedding Day</p>
@@ -341,8 +332,8 @@ $("#app").innerHTML = `
 <section class="pad">
   <p class="eyebrow">Location</p>
   <h2>오시는 길</h2>
-  <div class="loc-head"><h3>${esc(V.name)}</h3><button class="btn sm" data-copy="${esc(V.address)}" data-msg="주소를 복사했어요">${ICON.copy}주소 복사</button></div>
-  <p class="addr">${esc(V.address)}<br>${esc(V.hall)}</p>
+  <div class="loc-head"><h3>${esc(V.name)} ${esc(V.hall)}</h3><button class="btn sm" data-copy="${esc(V.address)}" data-msg="주소를 복사했어요">${ICON.copy}주소 복사</button></div>
+  <p class="addr">${esc(V.address)}</p>
   <div class="maps">
     <a class="btn" target="_blank" rel="noopener" href="https://map.naver.com/p/search/${encodeURIComponent(V.mapQuery || V.name)}">${ICON.pin}네이버 지도</a>
     <a class="btn" target="_blank" rel="noopener" href="https://map.kakao.com/link/search/${encodeURIComponent(V.mapQuery || V.name)}">${ICON.pin}카카오맵</a>
@@ -355,8 +346,8 @@ $("#app").innerHTML = `
   <p class="eyebrow">With Gratitude</p>
   <h2>마음 전하실 곳</h2>
   <div class="acc-sides">
-    <div><p>신랑 <b>${esc(G.name)}</b> 측</p><button class="btn" data-side="groom" aria-expanded="false" id="accGroomBtn">계좌번호 보기</button></div>
-    <div><p>신부 <b>${esc(B.name)}</b> 측</p><button class="btn" data-side="bride" aria-expanded="false" id="accBrideBtn">계좌번호 보기</button></div>
+    <div><p><b>신랑측</b></p><button class="btn" data-side="groom" aria-expanded="false" id="accGroomBtn">계좌번호 보기</button></div>
+    <div><p><b>신부측</b></p><button class="btn" data-side="bride" aria-expanded="false" id="accBrideBtn">계좌번호 보기</button></div>
   </div>
   <div class="acc-list" id="accList" hidden></div>
 </section>
@@ -365,7 +356,29 @@ $("#app").innerHTML = `
   <p class="eyebrow">R.S.V.P.</p>
   <h2>참석 의사 전달</h2>
   <p>원활한 식사 준비를 위해<br>참석 여부를 미리 알려주시면 감사하겠습니다.</p>
-  ${rsvpButton()}
+  <div id="rsvpBody">
+      <form class="rsvp-form" id="rsvpForm" novalidate>
+        <fieldset class="seg"><legend>어느 분의 하객이신가요?</legend>
+          <label><input type="radio" name="side" value="신랑측" id="sideG"><span>신랑측</span></label>
+          <label><input type="radio" name="side" value="신부측" id="sideB"><span>신부측</span></label>
+        </fieldset>
+        <fieldset class="seg"><legend>참석 여부</legend>
+          <label><input type="radio" name="attend" value="참석" id="attY"><span>참석</span></label>
+          <label><input type="radio" name="attend" value="불참" id="attN"><span>불참</span></label>
+        </fieldset>
+        <input class="field" id="rsvpName" name="name" placeholder="성함" maxlength="20" autocomplete="name">
+        <div class="row-2" id="rsvpExtra">
+          <select class="field" id="rsvpCount" name="count" aria-label="인원">
+            <option value="1">본인 1명</option><option value="2">2명</option><option value="3">3명</option><option value="4">4명</option><option value="5">5명 이상</option>
+          </select>
+          <select class="field" id="rsvpMeal" name="meal" aria-label="식사">
+            <option value="식사 예정">식사 예정</option><option value="식사 안 함">식사 안 함</option><option value="미정">미정</option>
+          </select>
+        </div>
+        <button class="btn primary" type="submit" id="rsvpSubmit">참석 여부 전달하기</button>
+        <p class="form-msg" id="rsvpOut" role="status"></p>
+      </form>
+    </div>
 </section>
 
 <footer class="pad">
@@ -373,28 +386,29 @@ $("#app").innerHTML = `
   ${Y}. ${String(M + 1).padStart(2, "0")}. ${String(D).padStart(2, "0")}. ${DOW[W]}요일 ${timeKo}
 </footer>`;
 
-/* Gallery: 9장 먼저, 나머지는 더 보기 */
+window.__dbgStep && __dbgStep("render");
+/* Gallery slider */
 const photos = DATA.photos.gallery;
-let shown = Math.min(9, photos.length);
-function renderGallery() {
-  $("#gallery").innerHTML = photos.slice(0, shown).map((src, i) => `<button data-i="${i}" aria-label="사진 ${i + 1} 크게 보기">${ph(src, `사진 ${i + 1}`)}</button>`).join("");
-  $("#more").hidden = shown >= photos.length;
-}
-renderGallery();
-$("#more").onclick = () => { shown = photos.length; renderGallery(); };
-
+const track = $("#track");
+track.innerHTML = photos.map((src, i) => `<div class="slide" aria-label="${i + 1} / ${photos.length}">${ph(src, `사진 ${i + 1}`)}</div>`).join("");
+$("#dots").innerHTML = photos.map((_, i) => `<button type="button" aria-label="${i + 1}번째 사진"></button>`).join("");
+const dots = [...document.querySelectorAll("#dots button")];
 let cur = 0;
-function openLb(i) { cur = (i + photos.length) % photos.length; const box = $("#lbPh"); box.outerHTML = ph(photos[cur], `사진 ${cur + 1}`).replace('class="ph', 'id="lbPh" class="ph'); $("#lbCount").textContent = `${cur + 1} / ${photos.length}`; $("#lb").hidden = false; }
-$("#gallery").addEventListener("click", e => { const b = e.target.closest("button[data-i]"); if (b) openLb(+b.dataset.i); });
-$("#lbClose").onclick = () => { $("#lb").hidden = true; };
-$("#lbPrev").onclick = () => openLb(cur - 1);
-$("#lbNext").onclick = () => openLb(cur + 1);
-$("#lb").addEventListener("click", e => { if (e.target.id === "lb") $("#lb").hidden = true; });
-document.addEventListener("keydown", e => { if ($("#lb").hidden) return; if (e.key === "Escape") $("#lb").hidden = true; if (e.key === "ArrowLeft") openLb(cur - 1); if (e.key === "ArrowRight") openLb(cur + 1); });
-let tx = 0;
-$("#lb").addEventListener("touchstart", e => { tx = e.touches[0].clientX; }, { passive: true });
-$("#lb").addEventListener("touchend", e => { const dx = e.changedTouches[0].clientX - tx; if (Math.abs(dx) > 50) openLb(cur + (dx < 0 ? 1 : -1)); });
+function setCur(i) {
+  cur = i;
+  dots.forEach((d, k) => d.setAttribute("aria-current", String(k === i)));
+  $("#prevBtn").disabled = i === 0;
+  $("#nextBtn").disabled = i === photos.length - 1;
+}
+function go(i) { i = Math.max(0, Math.min(photos.length - 1, i)); track.scrollTo({ left: i * track.clientWidth, behavior: "smooth" }); setCur(i); }
+track.addEventListener("scroll", () => { const i = Math.round(track.scrollLeft / track.clientWidth); if (i !== cur) setCur(i); }, { passive: true });
+$("#prevBtn").onclick = () => go(cur - 1);
+$("#nextBtn").onclick = () => go(cur + 1);
+dots.forEach((d, i) => d.onclick = () => go(i));
+setCur(0);
 
+window.__dbgStep && __dbgStep("gallery");
+guard("accounts", () => {
 /* Accounts toggle */
 let openSide = null;
 document.querySelectorAll("[data-side]").forEach(btn => btn.addEventListener("click", () => {
@@ -405,23 +419,18 @@ document.querySelectorAll("[data-side]").forEach(btn => btn.addEventListener("cl
   if (openSide) $("#accList").innerHTML = accHTML(DATA.accounts[openSide]);
 }));
 
-/* RSVP popup */
-const modal = $("#rsvpModal");
+});
+window.__dbgStep && __dbgStep("accounts");
+guard("rsvp", () => {
+/* RSVP form (inline) */
 const store = { get(k) { try { return localStorage.getItem(k); } catch (_) { return null; } }, set(k, v) { try { localStorage.setItem(k, v); } catch (_) {} } };
-const todayKey = "rsvp-hide-" + new Date().toDateString();
 function showThanks() {
   $("#rsvpBody").innerHTML = `<div class="thanks"><b>전달되었습니다</b>소중한 마음 감사드립니다.<br>${dateKo}에 뵙겠습니다.</div>`;
-  $("#rsvpToday").hidden = true;
 }
 if (store.get("rsvp-done") === "1") showThanks();
-if (store.get("rsvp-done") !== "1" && store.get(todayKey) !== "1") setTimeout(() => { modal.hidden = false; }, 600);
-$("#rsvpOpen").onclick = () => { modal.hidden = false; };
-$("#rsvpClose").onclick = () => { modal.hidden = true; };
-$("#rsvpToday").onclick = () => { store.set(todayKey, "1"); modal.hidden = true; };
-modal.addEventListener("click", e => { if (e.target === modal) modal.hidden = true; });
-document.addEventListener("keydown", e => { if (e.key === "Escape") modal.hidden = true; });
 
 const form = $("#rsvpForm");
+if (form) {
 form.addEventListener("change", () => { $("#rsvpExtra").hidden = form.attend.value === "불참"; });
 form.addEventListener("submit", async e => {
   e.preventDefault();
@@ -444,19 +453,24 @@ form.addEventListener("submit", async e => {
     btn.disabled = false; btn.textContent = "참석 여부 전달하기";
   }
 });
+}
 
+});
+window.__dbgStep && __dbgStep("rsvp");
+guard("reveal", () => {
 /* Scroll reveal: only things below the first screen wait to rise */
-const motionOK = !window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 if (motionOK && "IntersectionObserver" in window) {
   const io = new IntersectionObserver(es => es.forEach(en => { if (en.isIntersecting) { en.target.classList.add("in"); io.unobserve(en.target); } }), { rootMargin: "0px 0px -8% 0px" });
-  document.querySelectorAll("#app > section, #app > .facts, #app > footer, .gallery > button").forEach((el, i) => {
+  document.querySelectorAll("#app > section, #app > .facts, #app > footer, .gallery-wrap").forEach((el, i) => {
     if (el.getBoundingClientRect().top < innerHeight) return;
     el.classList.add("reveal");
-    if (el.parentElement.classList.contains("gallery")) el.style.transitionDelay = (i % 3) * 0.12 + "s";
     io.observe(el);
   });
 }
 
+});
+window.__dbgStep && __dbgStep("reveal");
+guard("petals", () => {
 /* Falling petals */
 (function petals() {
   const cv = $("#petals"); if (!cv.getContext) { cv.hidden = true; return; }
@@ -517,20 +531,17 @@ if (motionOK && "IntersectionObserver" in window) {
   window.__petals = { list, get W() { return W; }, get H() { return H; }, get frames() { return frames; } };
 })();
 
-/* ?debug=1 shows what the browser reports, for checking in-app browsers */
-if (/[?&]debug=1/.test(location.search)) {
-  const box = document.createElement("pre");
-  box.style.cssText = "position:fixed;left:8px;right:8px;bottom:8px;z-index:40;background:rgba(0,0,0,.78);color:#fff;font:11px/1.45 monospace;padding:8px;border-radius:6px;white-space:pre-wrap;margin:0";
-  document.body.appendChild(box);
-  const errs = [];
-  addEventListener("error", e => errs.push(e.message));
-  const tick = () => {
-    const img = document.querySelector(".cover img"), cs = img ? getComputedStyle(img) : {};
-    const P = window.__petals || {};
-    box.textContent = `ver 2026-10-23c\nUA ${navigator.userAgent}\nreduce ${matchMedia("(prefers-reduced-motion: reduce)").matches}\ninner ${innerWidth}x${innerHeight} canvas ${P.W}x${P.H} petals ${P.list && P.list.length} frames ${P.frames}\ncover anim ${cs.animationName} ${cs.animationPlayState} tf ${cs.transform}\nerrors ${errs.join(" | ") || "none"}`;
-  };
-  setInterval(tick, 500); tick();
-}
+});
+window.__dbgStep && __dbgStep("petals");
+/* No pinch-zoom, no double-tap zoom, no long-press save on photos */
+guard("nozoom", () => {
+  ["gesturestart", "gesturechange", "gestureend"].forEach(t => document.addEventListener(t, e => e.preventDefault(), { passive: false }));
+  document.addEventListener("touchmove", e => { if (e.touches.length > 1) e.preventDefault(); }, { passive: false });
+  let lastTap = 0;
+  document.addEventListener("touchend", e => { const now = Date.now(); if (now - lastTap < 300 && !e.target.closest("input, select, button, a")) e.preventDefault(); lastTap = now; }, { passive: false });
+  document.addEventListener("contextmenu", e => { if (e.target.closest(".ph")) e.preventDefault(); });
+  document.addEventListener("dragstart", e => { if (e.target.closest(".ph")) e.preventDefault(); });
+});
 
 /* Copy + toast */
 let tt;
