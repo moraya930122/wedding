@@ -72,19 +72,20 @@ button { font: inherit; cursor: pointer; }
 .parents b { display: block; font-size: 16px; font-weight: 600; color: var(--ink); margin-bottom: 4px; }
 .parents span { font-size: 13.5px; }
 
-/* Gallery: one photo at a time, swipe or arrows */
-.slider { position: relative; }
+.band { background: var(--sand); }
+/* Gallery: a matted photo frame on the sand band; one photo at a time, swipe or arrows */
+.slider { display: grid; grid-template-columns: 36px minmax(0, 1fr) 36px; align-items: center; gap: 6px; max-width: 330px; margin: 0 auto; }
+.frame { background: var(--paper); padding: 10px 10px 12px; border-radius: 3px; box-shadow: 0 1px 2px rgba(62,56,51,.08), 0 10px 28px -10px rgba(62,56,51,.28); outline: 1px solid rgba(110,97,86,.10); outline-offset: -5px; min-width: 0; }
 .track { display: flex; overflow-x: auto; scroll-snap-type: x mandatory; scroll-behavior: smooth; scrollbar-width: none; -webkit-overflow-scrolling: touch; overscroll-behavior-x: contain; }
 .track::-webkit-scrollbar { display: none; }
 .slide { flex: 0 0 100%; scroll-snap-align: center; scroll-snap-stop: always; }
 .slide .ph { aspect-ratio: 2 / 3; width: 100%; }
-.nav { position: absolute; z-index: 2; top: 50%; transform: translateY(-50%); width: 40px; height: 40px; border-radius: 50%; border: 0; background: rgba(250,247,242,.72); color: var(--ink); font-size: 22px; line-height: 1; display: grid; place-items: center; box-shadow: 0 1px 4px rgba(62,56,51,.15); }
-.nav.prev { left: 12px; } .nav.next { right: 12px; }
-.nav:disabled { opacity: 0; pointer-events: none; }
-.dots { display: flex; justify-content: center; gap: 8px; padding-block: 16px 0; }
-.dots button { width: 7px; height: 7px; padding: 0; border: 0; border-radius: 50%; background: var(--oat); transition: background .3s, transform .3s; }
-.dots button[aria-current="true"] { background: var(--taupe); transform: scale(1.25); }
-.gallery-wrap { padding-block: 0 8px; }
+.nav { position: relative; z-index: 2; width: 36px; height: 36px; border-radius: 50%; border: 1px solid var(--oat); background: var(--paper); color: var(--taupe); font-size: 20px; line-height: 1; display: grid; place-items: center; padding: 0 0 2px; }
+.nav:disabled { opacity: .3; cursor: default; }
+.dots { display: flex; justify-content: center; gap: 8px; padding-block: 18px 0; }
+.dots button { width: 6px; height: 6px; padding: 0; border: 0; border-radius: 50%; background: #D6CBBE; transition: background .3s, transform .3s; }
+.dots button[aria-current="true"] { background: var(--taupe); transform: scale(1.3); }
+.gallery-title { margin-bottom: 20px; }
 /* Photos can't be dragged, long-pressed to save, or selected */
 .ph, .ph img { -webkit-user-select: none; user-select: none; -webkit-touch-callout: none; -webkit-user-drag: none; }
 .ph img { pointer-events: none; }
@@ -132,28 +133,6 @@ button { font: inherit; cursor: pointer; }
 .acc .who { color: var(--mute); font-size: 12.5px; }
 .acc .num { color: var(--ink); font-variant-numeric: tabular-nums; overflow-wrap: anywhere; }
 
-/* RSVP popup + section */
-.btn.primary { background: var(--taupe); border-color: var(--taupe); color: var(--paper); width: 100%; justify-content: center; padding: 12px; }
-.btn.primary:disabled { opacity: .5; cursor: default; }
-.rsvp-form { display: grid; gap: 10px; text-align: left; }
-.seg { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; border: 0; margin: 0; padding: 0; min-width: 0; }
-.seg legend { font-size: 12.5px; color: var(--mute); margin-bottom: 4px; padding: 0; }
-.seg label { position: relative; }
-.seg input { position: absolute; opacity: 0; inset: 0; margin: 0; }
-.seg span { display: block; text-align: center; padding: 9px 4px; border: 1px solid var(--oat); border-radius: 8px; background: var(--paper); font-size: 14px; color: var(--text); }
-.seg input:checked + span { background: var(--taupe); border-color: var(--taupe); color: var(--paper); font-weight: 500; }
-.seg input:focus-visible + span { outline: 2px solid var(--taupe); outline-offset: 2px; }
-.field { width: 100%; font: inherit; font-size: 16px; color: var(--ink); background: var(--paper); border: 1px solid var(--oat); border-radius: 8px; padding: 9px 12px; }
-.field::placeholder { color: var(--mute); }
-.row-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; }
-.form-msg { margin: 2px 0 0 !important; font-size: 13px; text-align: center; min-height: 1em; }
-.form-msg.err { color: #A2574A; }
-.thanks { padding: 12px 0 4px; }
-.thanks b { display: block; font-size: 17px; color: var(--ink); font-weight: 600; margin-bottom: 6px; }
-.rsvp { text-align: center; }
-.rsvp p { margin: 0 0 20px; }
-.rsvp .rsvp-form { max-width: 340px; margin: 0 auto; }
-.rsvp .seg legend { text-align: left; }
 .note { font-size: 12px; color: var(--mute); margin-top: 10px !important; }
 
 /* Footer */
@@ -225,12 +204,11 @@ const DATA = {
     ["버스", "청담역.경기고교 정류장 하차\n간선 143 · 146 · 345\n지선 2413 · 3217 · 4318\n직행좌석 9407 · 9507 · 9607"],
     ["주차", "주차가 혼잡할 수 있으니 대중교통 이용을 권해 드립니다.\nSUV·대형 세단은 주차가 어려울 수 있습니다."]
   ],
-  rsvpEndpoint: "https://script.google.com/macros/s/AKfycbyqGmy0GMyYFO_TvQBXM6SewB9mu5QcIwK_IWl9jZdPFCz1sJT-JdAjnvwMMWRTFG2uRg/exec", // 구글 앱스 스크립트 웹 앱 URL (https://script.google.com/macros/s/.../exec)
   accounts: {
     groom: [ ["신랑", "박봉경", "신한은행", "110-212-181500"], ["아버지", "박종훈", "신한은행", "110-006-916133"], ["어머니", "황경순", "신한은행", "110-231-530855"] ],
-    bride: [ ["신부", "이아라", "", ""], ["아버지", "이재욱", "", ""], ["어머니", "김마리아", "", ""] ]
+    bride: [ ["신부", "이아라", "우리은행", "1002165022357"], ["어머니", "김마리아", "농협", "232-02-022197"] ]
   },
-  photos: { cover: "img/main.jpg", gallery: ["img/g04.jpg", "img/g02.jpg", "img/g06.jpg", "img/g01.jpg"] }
+  photos: { cover: "img/main.jpg", gallery: ["img/p1.jpg", "img/p2.jpg", "img/p3.jpg", "img/p4.jpg"] }
 };
 /* =================================================================== */
 
@@ -310,14 +288,15 @@ $("#app").innerHTML = `
   </div>
 </section>
 
-<div class="gallery-wrap">
+<section class="gallery-wrap band pad">
+  <p class="eyebrow gallery-title">Gallery</p>
   <div class="slider" aria-roledescription="carousel" aria-label="사진">
-    <div class="track" id="track"></div>
     <button class="nav prev" id="prevBtn" type="button" aria-label="이전 사진">‹</button>
+    <div class="frame"><div class="track" id="track"></div></div>
     <button class="nav next" id="nextBtn" type="button" aria-label="다음 사진">›</button>
   </div>
   <div class="dots" id="dots"></div>
-</div>
+</section>
 
 <section class="cal pad">
   <p class="eyebrow">Wedding Day</p>
@@ -352,36 +331,7 @@ $("#app").innerHTML = `
   <div class="acc-list" id="accList" hidden></div>
 </section>
 
-<section class="rsvp band pad">
-  <p class="eyebrow">R.S.V.P.</p>
-  <h2>참석 의사 전달</h2>
-  <p>원활한 식사 준비를 위해<br>참석 여부를 미리 알려주시면 감사하겠습니다.</p>
-  <div id="rsvpBody">
-      <form class="rsvp-form" id="rsvpForm" novalidate>
-        <fieldset class="seg"><legend>어느 분의 하객이신가요?</legend>
-          <label><input type="radio" name="side" value="신랑측" id="sideG"><span>신랑측</span></label>
-          <label><input type="radio" name="side" value="신부측" id="sideB"><span>신부측</span></label>
-        </fieldset>
-        <fieldset class="seg"><legend>참석 여부</legend>
-          <label><input type="radio" name="attend" value="참석" id="attY"><span>참석</span></label>
-          <label><input type="radio" name="attend" value="불참" id="attN"><span>불참</span></label>
-        </fieldset>
-        <input class="field" id="rsvpName" name="name" placeholder="성함" maxlength="20" autocomplete="name">
-        <div class="row-2" id="rsvpExtra">
-          <select class="field" id="rsvpCount" name="count" aria-label="인원">
-            <option value="1">본인 1명</option><option value="2">2명</option><option value="3">3명</option><option value="4">4명</option><option value="5">5명 이상</option>
-          </select>
-          <select class="field" id="rsvpMeal" name="meal" aria-label="식사">
-            <option value="식사 예정">식사 예정</option><option value="식사 안 함">식사 안 함</option><option value="미정">미정</option>
-          </select>
-        </div>
-        <button class="btn primary" type="submit" id="rsvpSubmit">참석 여부 전달하기</button>
-        <p class="form-msg" id="rsvpOut" role="status"></p>
-      </form>
-    </div>
-</section>
-
-<footer class="pad">
+<footer class="band pad">
   <p class="names">${esc(G.name)} · ${esc(B.name)}</p>
   ${Y}. ${String(M + 1).padStart(2, "0")}. ${String(D).padStart(2, "0")}. ${DOW[W]}요일 ${timeKo}
 </footer>`;
@@ -421,42 +371,6 @@ document.querySelectorAll("[data-side]").forEach(btn => btn.addEventListener("cl
 
 });
 window.__dbgStep && __dbgStep("accounts");
-guard("rsvp", () => {
-/* RSVP form (inline) */
-const store = { get(k) { try { return localStorage.getItem(k); } catch (_) { return null; } }, set(k, v) { try { localStorage.setItem(k, v); } catch (_) {} } };
-function showThanks() {
-  $("#rsvpBody").innerHTML = `<div class="thanks"><b>전달되었습니다</b>소중한 마음 감사드립니다.<br>${dateKo}에 뵙겠습니다.</div>`;
-}
-if (store.get("rsvp-done") === "1") showThanks();
-
-const form = $("#rsvpForm");
-if (form) {
-form.addEventListener("change", () => { $("#rsvpExtra").hidden = form.attend.value === "불참"; });
-form.addEventListener("submit", async e => {
-  e.preventDefault();
-  const out = $("#rsvpOut"); out.className = "form-msg err";
-  const side = form.side.value, attend = form.attend.value, name = form.name.value.trim();
-  if (!side) { out.textContent = "신랑측·신부측을 골라주세요."; return; }
-  if (!attend) { out.textContent = "참석 여부를 골라주세요."; return; }
-  if (!name) { out.textContent = "성함을 적어주세요."; form.name.focus(); return; }
-  if (!DATA.rsvpEndpoint) { out.textContent = "아직 응답 저장소가 연결되지 않았어요."; return; }
-  const btn = $("#rsvpSubmit"); btn.disabled = true; btn.textContent = "전달하는 중…"; out.textContent = "";
-  const body = { name, side, attend, count: attend === "참석" ? form.count.value : "0", meal: attend === "참석" ? form.meal.value : "-" };
-  try {
-    const res = await fetch(DATA.rsvpEndpoint, { method: "POST", headers: { "Content-Type": "text/plain;charset=utf-8" }, body: JSON.stringify(body) });
-    const json = await res.json();
-    if (!json.ok) throw new Error(json.error || "save failed");
-    store.set("rsvp-done", "1");
-    showThanks();
-  } catch (_) {
-    out.textContent = "전달하지 못했어요. 인터넷 연결을 확인하고 다시 눌러주세요.";
-    btn.disabled = false; btn.textContent = "참석 여부 전달하기";
-  }
-});
-}
-
-});
-window.__dbgStep && __dbgStep("rsvp");
 guard("reveal", () => {
 /* Scroll reveal: only things below the first screen wait to rise */
 if (motionOK && "IntersectionObserver" in window) {
