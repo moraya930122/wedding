@@ -79,7 +79,8 @@ button { font: inherit; cursor: pointer; }
 .track { display: flex; overflow-x: auto; scroll-snap-type: x mandatory; scroll-behavior: smooth; scrollbar-width: none; -webkit-overflow-scrolling: touch; overscroll-behavior-x: contain; }
 .track::-webkit-scrollbar { display: none; }
 .slide { flex: 0 0 100%; scroll-snap-align: center; scroll-snap-stop: always; }
-.slide .ph { aspect-ratio: 2 / 3; width: 100%; }
+.slide .ph { aspect-ratio: 2 / 3; width: 100%; overflow: hidden; }
+.slide .ph img { inset: auto; left: var(--l); top: var(--t); width: var(--w); height: auto; object-fit: initial; max-width: none; }
 .nav { position: relative; z-index: 2; width: 36px; height: 36px; border-radius: 50%; border: 1px solid var(--oat); background: var(--paper); color: var(--taupe); font-size: 20px; line-height: 1; display: grid; place-items: center; padding: 0 0 2px; }
 .nav:disabled { opacity: .3; cursor: default; }
 .dots { display: flex; justify-content: center; gap: 8px; padding-block: 18px 0; }
@@ -208,7 +209,8 @@ const DATA = {
     groom: [ ["신랑", "박봉경", "신한은행", "110-212-181500"], ["아버지", "박종훈", "신한은행", "110-006-916133"], ["어머니", "황경순", "신한은행", "110-231-530855"] ],
     bride: [ ["신부", "이아라", "우리은행", "1002165022357"], ["어머니", "김마리아", "농협", "232-02-022197"] ]
   },
-  photos: { cover: "img/main.jpg", gallery: ["img/p1.jpg", "img/p2.jpg", "img/p3.jpg", "img/p4.jpg"] }
+  // gallery: [사진, 보이는 폭 %, 왼쪽 %, 위쪽 %]
+  photos: { cover: "img/main.jpg", gallery: [["img/g04.jpg", 111.11, -5.56, -11.11], ["img/g02.jpg", 142.86, -41.43, -14.29], ["img/g06.jpg", 100.0, -0.0, -0.0], ["img/g01.jpg", 138.89, -27.78, -33.28]] }
 };
 /* =================================================================== */
 
@@ -340,7 +342,7 @@ window.__dbgStep && __dbgStep("render");
 /* Gallery slider */
 const photos = DATA.photos.gallery;
 const track = $("#track");
-track.innerHTML = photos.map((src, i) => `<div class="slide" aria-label="${i + 1} / ${photos.length}">${ph(src, `사진 ${i + 1}`)}</div>`).join("");
+track.innerHTML = photos.map(([src, w, l, t], i) => `<div class="slide" aria-label="${i + 1} / ${photos.length}" style="--w:${w}%;--l:${l}%;--t:${t}%">${ph(src, `사진 ${i + 1}`)}</div>`).join("");
 $("#dots").innerHTML = photos.map((_, i) => `<button type="button" aria-label="${i + 1}번째 사진"></button>`).join("");
 const dots = [...document.querySelectorAll("#dots button")];
 let cur = 0;
